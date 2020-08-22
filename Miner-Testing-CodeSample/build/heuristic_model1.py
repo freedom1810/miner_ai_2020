@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+from GAME_SOCKET import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
 from MINER_STATE import State
 import copy
 import sys
@@ -48,7 +48,7 @@ class Heuristic_1:
         # next_cell = self.path_to_des.pop()
         next_cell = self.path_to_des[1]
 
-        if -self.lost_energy_next_step(next_cell)  >= self.state.energy:
+        if -self.lost_energy_next_step(next_cell)  > self.state.energy:
             return 4
         
         action = self.convert_point_to_action(next_cell)
