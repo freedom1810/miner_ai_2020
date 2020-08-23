@@ -8,7 +8,7 @@ import datetime
 import numpy as np
 
 import os
-
+import time
 HOST = "localhost"
 PORT = 1111
 if len(sys.argv) == 3:
@@ -59,9 +59,10 @@ for m_ in (1,2,3,4,5):
                     for step in range(0, maxStep):
                         s = minerEnv.get_state()
                         # print(s.x, s.y, s.energy)
-                        
+                        tic = time.time()
                         action = heuristic_1.act(s)  # Getting an action from the DQN model from the state (s)
                         # print(action)
+                        print('time: {}'.format(time.time() - tic))
                         minerEnv.step(str(action))  # Performing the action in order to obtain the new state
                         if minerEnv.check_terminate():break
 

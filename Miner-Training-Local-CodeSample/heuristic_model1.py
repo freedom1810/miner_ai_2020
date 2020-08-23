@@ -3,7 +3,6 @@ import numpy as np
 from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
 from MINER_STATE import State
 import copy
-import sys
 
 TreeID = 1
 TrapID = 2
@@ -20,6 +19,7 @@ class Heuristic_1:
         # return 4
 
         self.state = state
+        self.obstacle_info = self.creat_obstacle_info()
 
         if self.state.lastAction == 4 and self.state.energy < 40:
             return 4
@@ -44,8 +44,6 @@ class Heuristic_1:
 
         self.path_to_des = self.path[self.des[0]][self.des[1]]
         self.path_to_des.append(self.des)
-        # self.path_to_des = self.path_to_des[::-1][:-1]
-        # next_cell = self.path_to_des.pop()
         next_cell = self.path_to_des[1]
 
         if -self.lost_energy_next_step(next_cell)  >= self.state.energy:
@@ -56,23 +54,21 @@ class Heuristic_1:
     
         return action 
 
-    def get_obstacle_value(self, x, y):  # Get the kind of the obstacle at cell(x,y)
-        for cell in self.state.mapInfo.obstacles:
-            if x == cell["posx"] and y == cell["posy"]:
-                if cell["value"] == 0:
-                    return -13
-                if cell["value"] == -100:
-                    return -1000
-                return cell["value"]
-        
-        return -1
 
-    def get_gold_position(self, x, y):  # Get the kind of the obstacle at cell(x,y)
+    def creat_obstacle_info(self):
+        view = np.zeros([self.state.mapInfo.max_x + 1, self.state.mapInfo.max_y + 1], dtype=int) - 1
+        for cell in self.state.mapInfo.obstacles:
+            if cell['value'] == 0:
+                view[cell["posx"]][cell["posy"]] = -13
+            elif cell['value'] == -100:
+                view[cell["posx"]][cell["posy"]] = -1000
+            else:
+                view[cell["posx"]][cell["posy"]] = cell['value']
+
         for cell in self.state.mapInfo.golds:
-            if x == cell["posx"] and y == cell["posy"]:
-                return -4
+            view[cell["posx"]][cell["posy"]] = -4
         
-        return None
+        return view
 
     def get_gold_amount(self, x, y):  # Get the kind of the obstacle at cell(x,y)
         for cell in self.state.mapInfo.golds:
@@ -91,35 +87,23 @@ class Heuristic_1:
                 if i - 1 >= 0:
                     x = i - 1
                     y = j
-                    if self.get_gold_position(x, y) is not None:
-                        graph[i][j].append((x, y, 17 - -4))
-                    else:
-                        graph[i][j].append((x, y, 17 - self.get_obstacle_value(x, y)))
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 if i + 1 < 21:
                     x = i + 1
                     y = j
-                    if self.get_gold_position(x, y) is not None:
-                        graph[i][j].append((x, y, 17 - -4))
-                    else:
-                        graph[i][j].append((x, y, 17 - self.get_obstacle_value(x, y)))
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
                 
-                if y - 1 >= 0:
+                if j - 1 >= 0:
                     x = i
                     y = j - 1
-                    if self.get_gold_position(x, y) is not None:
-                        graph[i][j].append((x, y, 17 - -4))
-                    else:
-                        graph[i][j].append((x, y, 17 - self.get_obstacle_value(x, y)))
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 
-                if y + 1 < 9:
+                if j + 1 < 9:
                     x = i
                     y = j + 1
-                    if self.get_gold_position(x, y) is not None:
-                        graph[i][j].append((x, y, 17 - -4))
-                    else:
-                        graph[i][j].append((x, y, 17 - self.get_obstacle_value(x, y)))
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
         return graph    
 
@@ -218,7 +202,6 @@ class Heuristic_1:
 
         if next_cell[1] - self.state.y == 1: return 3
         if next_cell[1] - self.state.y == -1: return 2
-
 
     def find_gold(self):
         ''' find nearest gold'''
