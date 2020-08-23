@@ -19,7 +19,8 @@ class Heuristic_1:
         # return 4
 
         self.state = state
-        self.obstacle_info = self.creat_obstacle_info()
+        self.obstacle_info = self.create_obstacle_info()
+        self.gold_info = self.create_gold_info()
 
         if self.state.lastAction == 4 and self.state.energy < 40:
             return 4
@@ -32,7 +33,7 @@ class Heuristic_1:
             self.des = self.find_gold()
 
         if self.check_den_dich(): # đang ở vị trí gold
-            gold_amount = self.get_gold_amount(self.des[0], self.des[1])
+            gold_amount = self.gold_info[self.des[0]][self.des[1]]
             if gold_amount > 0:
                 if self.state.energy > 5:
                     return 5
@@ -55,7 +56,7 @@ class Heuristic_1:
         return action 
 
 
-    def creat_obstacle_info(self):
+    def create_obstacle_info(self):
         view = np.zeros([self.state.mapInfo.max_x + 1, self.state.mapInfo.max_y + 1], dtype=int) - 1
         for cell in self.state.mapInfo.obstacles:
             if cell['value'] == 0:
@@ -70,12 +71,11 @@ class Heuristic_1:
         
         return view
 
-    def get_gold_amount(self, x, y):  # Get the kind of the obstacle at cell(x,y)
+    def create_gold_info(self):
+        view = np.zeros([self.state.mapInfo.max_x + 1, self.state.mapInfo.max_y + 1], dtype=int)
         for cell in self.state.mapInfo.golds:
-            if x == cell["posx"] and y == cell["posy"]:
-                return cell["amount"]
-        
-        return 0
+            view[cell["posx"]][cell["posy"]] = cell['amount']
+        return view
 
     def create_graph(self):
         
@@ -87,24 +87,27 @@ class Heuristic_1:
                 if i - 1 >= 0:
                     x = i - 1
                     y = j
-                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    if self.obstacle_info[x][y] != -1000:
+                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 if i + 1 < 21:
                     x = i + 1
                     y = j
-                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    if self.obstacle_info[x][y] != -1000:
+                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
                 
                 if j - 1 >= 0:
                     x = i
                     y = j - 1
-                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    if self.obstacle_info[x][y] != -1000:
+                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 
                 if j + 1 < 9:
                     x = i
                     y = j + 1
-                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
-
+                    if self.obstacle_info[x][y] != -1000:
+                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
         return graph    
 
     def dijkstra(self, src):
@@ -180,21 +183,24 @@ class Heuristic_1:
 
     def lost_energy_next_step(self, next_cell):
 
-        for cell in self.state.mapInfo.obstacles:
-            if next_cell[0] == cell["posx"] and next_cell[1] == cell["posy"]:
-                if cell["value"] == 0:
-                    return -20
-                elif cell["value"] == -100:
-                    return -100
-                else:
-                    return cell["value"]
+        # for cell in self.state.mapInfo.obstacles:
+        #     if next_cell[0] == cell["posx"] and next_cell[1] == cell["posy"]:
+        #         if cell["value"] == 0:
+        #             return -20
+        #         elif cell["value"] == -100:
+        #             return -100
+        #         else:
+        #             return cell["value"]
                     
         
-        for cell in self.state.mapInfo.golds:
-            if next_cell[0] == cell["posx"] and next_cell[1] == cell["posy"]:
-                return -4
+        # for cell in self.state.mapInfo.golds:
+        #     if next_cell[0] == cell["posx"] and next_cell[1] == cell["posy"]:
+        #         return -4
         
-        return -1
+        # return -1
+        if self.obstacle_info[next_cell[0]][next_cell[1]] == -13:
+            return -20
+        return self.obstacle_info[next_cell[0]][next_cell[1]]
     
     def convert_point_to_action(self, next_cell):
         if next_cell[0] - self.state.x == 1: return 1
