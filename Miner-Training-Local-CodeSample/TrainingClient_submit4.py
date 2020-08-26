@@ -1,11 +1,21 @@
 import sys
 # from DQNModel import DQN # A class of creating a deep q-learning model
 from MinerEnv import MinerEnv # A class of creating a communication environment between the DQN model and the GameMiner environment (GAME_SOCKET_DUMMY.py)
-from heuristic_model1 import Heuristic_1
+from heuristic_model1_submit4 import Heuristic_1
 
 import pandas as pd
 import datetime 
 import numpy as np
+
+import json
+import codecs
+
+game = json.load(codecs.open('submit_4/game_2.json', 'r', 'utf-8-sig'))
+# for step in game:
+#     print(step.keys())
+#     for player in step['players']:
+#         if player['status'] != 0:
+#             print(player)
 
 import os
 import time
@@ -45,8 +55,9 @@ for m_ in (1,2,3,4,5):
                     # posID_y = np.random.randint(MAP_MAX_Y) #Choosing a initial position of the DQN agent on Y-axes randomly
                     # #Creating a request for initializing a map, initial position, the initial energy, and the maximum number of steps of the DQN agent
                     # request = ("map" + str(mapID) + "," + str(posID_x) + "," + str(posID_y) + ",50,100") 
-                    x_ = 0
-                    y_ = 1
+                    m_ = 2
+                    x_ = 13
+                    y_ = 5
                     request = 'map{},{},{},50,100'.format(m_, x_, y_)
                     print(request)
                     # request = 'map1,1,1,50, 100'
@@ -60,14 +71,45 @@ for m_ in (1,2,3,4,5):
 
                     #Start an episde 
                     for step in range(0, maxStep):
-                        s = minerEnv.get_state()
+                        if step == 0:
+                            s = minerEnv.get_state()
+                        else:
+                            another_player = 2
+                            # print(type(game[step]['golds']))
+                            s.mapInfo.golds = game[step -1]['golds']
+                            for cell in s.mapInfo.obstacles:
+                                for cell_ in game[step - 1]['changedObstacles']:
+                                    if cell['posx'] == cell_['posx'] and cell['posy'] == cell_['posy']:
+                                        cell['type'] = cell_['type']
+                                        cell['value'] = cell_['value']
+                            for player in game[step - 1]['players']:
+                                if player['playerId'] == 2344466:
+                                    s.lastAction = player['lastAction']
+                                    s.x = player['posx']
+                                    s.y = player['posy']
+                                    s.energy = player['energy']
+                                    s.status = player['status']
+                                else:
+                                    s.players.append({"playerId": another_player, 
+                                                        "posx": player['posx'], 
+                                                        "posy": player['posy'],
+                                                        "energy": player["energy"],
+                                                        "status": player["status"],
+                                                        "lastAction": player["lastAction"]})
+                                    another_player += 1
+                        
+                        for player in game[step]['players']:
+                            if player['playerId'] == 2344466:
+                                print('action must do next step: {}'.format(player['lastAction']))
+                                
+
                         # print(s.x, s.y, s.energy)
-                        tic = time.time()
+                        # tic = time.time()
                         action = heuristic_1.act(s)  
-                        # print('step: {}, action: {}'.format(minerEnv.state.stepCount, action))
+                        print('step: {}, action: {}'.format(step, action))
                         # print('time: {}'.format(time.time() - tic))
-                        minerEnv.step(str(action))  # Performing the action in order to obtain the new state
-                        if minerEnv.check_terminate():break
+                        # minerEnv.step(str(action))  # Performing the action in order to obtain the new state
+                        # if minerEnv.check_terminate():break
 
                     print('bot1_score: {}, step count: {}\n'.format(minerEnv.socket.bots[0].info.score, minerEnv.socket.bots[0].step_count),
                         'bot2_score: {}, step count: {}\n'.format(minerEnv.socket.bots[1].info.score, minerEnv.socket.bots[1].step_count),

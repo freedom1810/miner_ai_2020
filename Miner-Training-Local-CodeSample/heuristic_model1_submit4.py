@@ -38,12 +38,15 @@ class Heuristic_1:
         if self.des is None:
             return 4 # hết vàng rồi thì k làm gì nữa
 
+        # print(self.state.x, self.state.y)
+        # print(self.des)
 
         if self.check_den_dich(): # check xem có đang ở vị trí gold
             gold_amount = self.gold_info[self.des[0]][self.des[1]]
             if gold_amount > 0:
                 if not self.check_di_truoc(gold_amount):
                     if self.state.energy > 5:
+                        # print('vang1')
                         return 5
                     else:
                         return 4
@@ -52,6 +55,7 @@ class Heuristic_1:
                     # print(new_des, self.des)
                     if self.des[0] == new_des[0] and self.des[1] == new_des[1]:
                         if self.state.energy > 5:
+                            # print('vang2')
                             return 5
                         else:
                             return 4
@@ -61,6 +65,7 @@ class Heuristic_1:
         if self.gold_info[self.state.x][self.state.y] > 0:  # trên đường đi lại đi qua 1 mỏ vàng khác -> đào luôn
             if self.state.energy > 5:
                 if not self.check_di_truoc(self.gold_info[self.state.x][self.state.y]):
+                    # print('vang3')
                     return 5
             else:
                 return 4
@@ -165,12 +170,9 @@ class Heuristic_1:
                         min = dist[i][j] 
                         min_index_i = i
                         min_index_j = j 
-            try:
-                return min_index_i, min_index_j
-            except:
-                pass
-            return None 
-            
+    
+            return min_index_i, min_index_j
+
         def get_distance(u, v):
             if ((u[0] - v[0])**2 + (u[1] - v[1])**2) == 1:
                 for v_ in self.graph[u[0]][u[1]]:
@@ -193,30 +195,31 @@ class Heuristic_1:
                 dist[i].append(sys.maxsize)
         dist[src[0]][src[1]] = 0
 
-
         sptSet = []
         for i in range(21):
             sptSet.append([])
             for j in range(9):
                 sptSet[i].append(False)
-                
+
+        # sptSet[src[0]][src[1]] == True
+
         for _ in range(21*9):
+
             u = minDistance(dist, sptSet)
+
             sptSet[u[0]][u[1]] = True
 
-            for i in (-1,0,1):
-                for j in (-1,0,1):
-                    v = [u[0] + i, u[1] + j]
-
-
-                    distance = get_distance(u, v)
+            for i in range(21):
+                for j in range(9):
+                    distance = get_distance(u, [i, j])
                     if distance != -1 and \
-                        sptSet[v[0]][v[1]] == False and \
-                        dist[v[0]][v[1]] > dist[u[0]][u[1]] + distance:
+                        sptSet[i][j] == False and \
+                        dist[i][j] > dist[u[0]][u[1]] + distance:
 
-                        dist[v[0]][v[1]] = dist[u[0]][u[1]] + distance
-                        path[v[0]][v[1]] = path[u[0]][u[1]] + [[u[0], u[1]]]
+                        dist[i][j] = dist[u[0]][u[1]] + distance
+                        path[i][j] = path[u[0]][u[1]] + [[u[0], u[1]]]
 
+        # print(path) 
         return path 
 
     def check_den_dich(self):
