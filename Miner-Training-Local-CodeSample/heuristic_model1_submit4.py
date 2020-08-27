@@ -16,6 +16,7 @@ class Heuristic_1:
 
 
     def act(self, state):
+
         # return 4
         # print('step')
         self.state = state
@@ -131,27 +132,27 @@ class Heuristic_1:
                 if i - 1 >= 0:
                     x = i - 1
                     y = j
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 if i + 1 < 21:
                     x = i + 1
                     y = j
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
                 
                 if j - 1 >= 0:
                     x = i
                     y = j - 1
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 
                 if j + 1 < 9:
                     x = i
                     y = j + 1
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
         return graph    
 
     def dijkstra(self, src):
@@ -170,8 +171,10 @@ class Heuristic_1:
                         min = dist[i][j] 
                         min_index_i = i
                         min_index_j = j 
-    
-            return min_index_i, min_index_j
+            try:
+                return min_index_i, min_index_j
+            except:
+                return None
 
         def get_distance(u, v):
             if ((u[0] - v[0])**2 + (u[1] - v[1])**2) == 1:
@@ -206,6 +209,13 @@ class Heuristic_1:
         for _ in range(21*9):
 
             u = minDistance(dist, sptSet)
+
+            if u is None:
+                for i in range(21):
+                    for j in range(9):
+                        if sptSet[i][j] == False:
+                            print(i, j)
+                            print(self.obstacle_info[i][j])
 
             sptSet[u[0]][u[1]] = True
 

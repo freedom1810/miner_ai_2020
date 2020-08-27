@@ -126,27 +126,27 @@ class Heuristic_1:
                 if i - 1 >= 0:
                     x = i - 1
                     y = j
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 if i + 1 < 21:
                     x = i + 1
                     y = j
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
                 
                 if j - 1 >= 0:
                     x = i
                     y = j - 1
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 
                 if j + 1 < 9:
                     x = i
                     y = j + 1
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
         return graph    
 
     def dijkstra(self, src):
