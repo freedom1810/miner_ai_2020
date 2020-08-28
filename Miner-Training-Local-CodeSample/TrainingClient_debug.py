@@ -16,7 +16,6 @@ game = json.load(codecs.open('submit_4/game_2.json', 'r', 'utf-8-sig'))
 #     for player in step['players']:
 #         if player['status'] != 0:
 #             print(player)
-
 import os
 import time
 HOST = "localhost"
@@ -26,35 +25,17 @@ if len(sys.argv) == 3:
     PORT = int(sys.argv[2])
 
 
-# Create header for saving DQN learning file
-# now = datetime.datetime.now() #Getting the latest datetime
-# header = ["Ep", "Step", "Reward", "Total_reward", "Action", "Epsilon", "Done", "Termination_Code", "Loss"] #Defining header for the save file
-# filename = LOG_PATH + now.strftime("%Y%m%d-%H%M") + ".csv" 
-# with open(filename, 'w') as f:
-#     pd.DataFrame(columns=header).to_csv(f, encoding='utf-8', index=False, header=True)
-
-
 # Initialize environment
 minerEnv = MinerEnv(HOST, PORT) #Creating a communication environment between the DQN model and the game environment (GAME_SOCKET_DUMMY.py)
 minerEnv.start()  # Connect to the game
 
-#Training Process
-#the main part of the deep-q learning agorithm 
-m = [1,2,3,4,5]
-# for episode_i in range(0, 4):
+
 for m_ in (1,2,3,4,5):
     for x_ in range(21):
         for y_ in range(9):
             for _ in range(4):
                 try:
                     heuristic_1 = Heuristic_1()
-                    # # Choosing a map in the list
-                    # # mapID = np.random.randint(1, 6) #Choosing a map ID from 5 maps in Maps folder randomly
-                    # mapID = m[episode_i]
-                    # posID_x = np.random.randint(MAP_MAX_X) #Choosing a initial position of the DQN agent on X-axes randomly
-                    # posID_y = np.random.randint(MAP_MAX_Y) #Choosing a initial position of the DQN agent on Y-axes randomly
-                    # #Creating a request for initializing a map, initial position, the initial energy, and the maximum number of steps of the DQN agent
-                    # request = ("map" + str(mapID) + "," + str(posID_x) + "," + str(posID_y) + ",50,100") 
                     m_ = 2
                     x_ = 13
                     y_ = 5
