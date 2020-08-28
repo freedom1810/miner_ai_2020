@@ -31,7 +31,7 @@ class Bot3:
 
     def next_action(self):
         self.step_count += 1
-        # return 4
+        return 4
 
         
         if self.des is None:

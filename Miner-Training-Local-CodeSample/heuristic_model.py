@@ -1,6 +1,9 @@
 import sys
 import numpy as np
-from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+try:
+    from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+except:
+    from GAME_SOCKET import GameSocket 
 from MINER_STATE import State
 import copy
 
@@ -18,52 +21,33 @@ class Heuristic_1:
     def act(self, state):
         # return 4
         # print('step')
-        self.state = state
-        self.obstacle_info = self.create_obstacle_info() # khởi tạo mảng 2 chiều về thông tin chướng ngoại vật
-        self.gold_info = self.create_gold_info() # khởi tạo mảng 2 chiều về thông tin vàng
+        self.init_state(state)
 
         if self.state.lastAction == 4 and self.state.energy < 40:
             return 4
 
-        self.graph = self.create_graph() # khởi tạo graph tình chi phí đường đi giữa các điểm theo năng lượng
-        self.path = self.dijkstra([self.state.x, self.state.y]) # tính đường đi ngắn nhất từ vị trí hiện tại tới tất cả vị trí khác
 
-        if self.des is None:
-            self.des = self.find_gold() # ban đầu khởi tạo sẽ chưa có des
-        else:
-            if self.gold_info[self.des[0]][self.des[1]] == 0: # mỏ vàng đang định đi đến nhưng đã bị đào hết
-                self.des = self.find_gold()
-
-        # print('self.des: ', self.des)
-        if self.des is None:
-            return 4 # hết vàng rồi thì k làm gì nữa
-
+        if self.check_des_none() is not None: 
+            print('check des')
+            return 4
 
         if self.check_den_dich(): # check xem có đang ở vị trí gold
             gold_amount = self.gold_info[self.des[0]][self.des[1]]
             if gold_amount > 0:
                 if not self.check_di_truoc(gold_amount):
-                    if self.state.energy > 5:
-                        return 5
-                    else:
-                        return 4
+                    return self.dao_vang()
                 else:
+                    #check di truoc nhung neu đi trước mà new des trùng self.des chứng tỏ map không còn vàng -> đào tiếp 
                     new_des = self.find_gold()
                     # print(new_des, self.des)
                     if self.des[0] == new_des[0] and self.des[1] == new_des[1]:
-                        if self.state.energy > 5:
-                            return 5
-                        else:
-                            return 4
+                        return self.dao_vang()
                     else:
                         self.des = new_des
 
         if self.gold_info[self.state.x][self.state.y] > 0:  # trên đường đi lại đi qua 1 mỏ vàng khác -> đào luôn
-            if self.state.energy > 5:
-                if not self.check_di_truoc(self.gold_info[self.state.x][self.state.y]):
-                    return 5
-            else:
-                return 4
+            if not self.check_di_truoc(self.gold_info[self.state.x][self.state.y]):
+                return self.dao_vang()
 
         self.path_to_des = self.path[self.des[0]][self.des[1]]
         self.path_to_des.append(self.des)  # không được phép xóa , khi nó gần sát des thì path_to_des chỉ có mình (state.x, state.y)
@@ -77,7 +61,35 @@ class Heuristic_1:
     
         return action 
 
+    def init_state(self, state):
+        self.state = state
+        self.obstacle_info = self.create_obstacle_info() # khởi tạo mảng 2 chiều về thông tin chướng ngoại vật
+        self.gold_info = self.create_gold_info() # khởi tạo mảng 2 chiều về thông tin vàng
+
+        self.graph = self.create_graph() # khởi tạo graph tình chi phí đường đi giữa các điểm theo năng lượng
+        self.path = self.dijkstra([self.state.x, self.state.y]) # tính đường đi ngắn nhất từ vị trí hiện tại tới tất cả vị trí khác
+
+    def dao_vang(self):
+        if self.state.energy > 5:
+            return 5
+        else:
+            return 4
+
+    def check_des_none(self):
+        if self.des is None:
+            self.des = self.find_gold() # ban đầu khởi tạo sẽ chưa có des
+        else:
+            if self.gold_info[self.des[0]][self.des[1]] == 0: # mỏ vàng đang định đi đến nhưng đã bị đào hết
+                self.des = self.find_gold()
+
+        # print('self.des: ', self.des)
+        if self.des is None:
+            return 4 # hết vàng rồi thì k làm gì nữa
+        
+        # self.des = self.find_gold() đẽo cày giữa đường k hiệu quả
+
     def check_di_truoc(self, gold_amount):
+        # nếu quyết định đào vàng mà vàng đem về <50 -> đi luôn k đào nữa
         count = 0
         for player in self.state.players:
             if player['playerId'] != 1 and self.check_status(player):
@@ -126,27 +138,27 @@ class Heuristic_1:
                 if i - 1 >= 0:
                     x = i - 1
                     y = j
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 if i + 1 < 21:
                     x = i + 1
                     y = j
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
                 
                 if j - 1 >= 0:
                     x = i
                     y = j - 1
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
 
                 
                 if j + 1 < 9:
                     x = i
                     y = j + 1
-                    if self.obstacle_info[x][y] != -1000:
-                        graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
+                    # if self.obstacle_info[x][y] != -1000:
+                    graph[i][j].append((x, y, 17 - self.obstacle_info[x][y]))
         return graph    
 
     def dijkstra(self, src):
@@ -165,9 +177,12 @@ class Heuristic_1:
                         min = dist[i][j] 
                         min_index_i = i
                         min_index_j = j 
-    
-            return min_index_i, min_index_j
-
+            try:
+                return min_index_i, min_index_j
+            except:
+                pass
+            return None 
+            
         def get_distance(u, v):
             if ((u[0] - v[0])**2 + (u[1] - v[1])**2) == 1:
                 for v_ in self.graph[u[0]][u[1]]:
@@ -190,31 +205,30 @@ class Heuristic_1:
                 dist[i].append(sys.maxsize)
         dist[src[0]][src[1]] = 0
 
+
         sptSet = []
         for i in range(21):
             sptSet.append([])
             for j in range(9):
                 sptSet[i].append(False)
-
-        # sptSet[src[0]][src[1]] == True
-
+                
         for _ in range(21*9):
-
             u = minDistance(dist, sptSet)
-
             sptSet[u[0]][u[1]] = True
 
-            for i in range(21):
-                for j in range(9):
-                    distance = get_distance(u, [i, j])
+            for i in (-1,0,1):
+                for j in (-1,0,1):
+                    v = [u[0] + i, u[1] + j]
+
+
+                    distance = get_distance(u, v)
                     if distance != -1 and \
-                        sptSet[i][j] == False and \
-                        dist[i][j] > dist[u[0]][u[1]] + distance:
+                        sptSet[v[0]][v[1]] == False and \
+                        dist[v[0]][v[1]] > dist[u[0]][u[1]] + distance:
 
-                        dist[i][j] = dist[u[0]][u[1]] + distance
-                        path[i][j] = path[u[0]][u[1]] + [[u[0], u[1]]]
+                        dist[v[0]][v[1]] = dist[u[0]][u[1]] + distance
+                        path[v[0]][v[1]] = path[u[0]][u[1]] + [[u[0], u[1]]]
 
-        # print(path) 
         return path 
 
     def check_den_dich(self):
@@ -263,7 +277,8 @@ class Heuristic_1:
                 max_gold_x = cell['posx']
                 max_gold_y = cell['posy']
                 max_gold = cell['amount']/num_step_to_gold
-        # print('model: {}, {}'.format(max_gold_x, max_gold_y))        
+                n = num_step_to_gold
+        # print('model: x: {}, y: {}, num_step: {}'.format(max_gold_x, max_gold_y, n))        
 
         return [max_gold_x, max_gold_y]
 
@@ -272,16 +287,11 @@ class Heuristic_1:
 
         path_to_des = self.path[gold_potision[0]][gold_potision[1]]
         path_to_des.append(gold_potision)
-        path_to_des = path_to_des[::-1][:-1]
-        
-        # next_cell = self.path_to_des.pop()
+        path_to_des = path_to_des[1:]
 
         num_step = 0
         step = []
 
-
-        # while path_to_des:
-            # next_cell = path_to_des.pop()
         for next_cell in path_to_des:
             if -self.lost_energy_next_step(next_cell)  > energy:
                 for nang_luong_hoi in (4,3,2):
@@ -289,14 +299,23 @@ class Heuristic_1:
                         num_step += 1
                         energy += 50//nang_luong_hoi
                         energy = min(50, energy)
-                        # print(energy)
-                        # step.append(4)
+
                 
             energy += self.lost_energy_next_step(next_cell)
             num_step += 1
 
-            # step.append(next_cell)
-        # print(step)
+        gold_amount = self.gold_info[gold_potision[0], gold_potision[1]]
+        while gold_amount > 0:
+            if 5 >= energy:
+                for nang_luong_hoi in (4,3,2):
+                    if energy < 40:
+                        num_step += 1
+                        energy += 50//nang_luong_hoi
+                        energy = min(50, energy)
+            energy += -5
+            num_step += 1
+            gold_amount -= 50
+
 
         if num_step == 0: return 1
         return num_step

@@ -1,7 +1,7 @@
 import sys
 # from DQNModel import DQN # A class of creating a deep q-learning model
 from MinerEnv import MinerEnv # A class of creating a communication environment between the DQN model and the GameMiner environment (GAME_SOCKET_DUMMY.py)
-from heuristic_model1 import Heuristic_1
+from heuristic_model import Heuristic_1
 
 import pandas as pd
 import datetime 
@@ -45,8 +45,8 @@ for m_ in (1,2,3,4,5):
                     # posID_y = np.random.randint(MAP_MAX_Y) #Choosing a initial position of the DQN agent on Y-axes randomly
                     # #Creating a request for initializing a map, initial position, the initial energy, and the maximum number of steps of the DQN agent
                     # request = ("map" + str(mapID) + "," + str(posID_x) + "," + str(posID_y) + ",50,100") 
-                    x_ = 0
-                    y_ = 1
+                    # x_ = 0
+                    # y_ = 1
                     request = 'map{},{},{},50,100'.format(m_, x_, y_)
                     print(request)
                     # request = 'map1,1,1,50, 100'

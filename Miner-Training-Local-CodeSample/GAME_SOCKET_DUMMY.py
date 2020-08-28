@@ -369,8 +369,8 @@ class GameSocket:
 
     def go_to_pos(self, user):  # player move to cell(x,y)
         if self.map[user.posy][user.posx] == -1:
-            # user.energy -= randrange(16) + 5
-            user.energy -= 15
+            user.energy -= randrange(16) + 5
+            # user.energy -= 15
 
         elif self.map[user.posy][user.posx] == 0:
             user.energy += self.energyOnMap[user.posy][user.posx]
