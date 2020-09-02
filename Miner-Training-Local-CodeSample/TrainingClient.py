@@ -1,7 +1,7 @@
 import sys
 # from DQNModel import DQN # A class of creating a deep q-learning model
 from MinerEnv import MinerEnv # A class of creating a communication environment between the DQN model and the GameMiner environment (GAME_SOCKET_DUMMY.py)
-from heuristic_model import Heuristic_1
+from heuristic_model_submit_9 import Heuristic_1
 
 import pandas as pd
 import datetime 
@@ -33,23 +33,15 @@ minerEnv.start()  # Connect to the game
 m = [1,2,3,4,5]
 # for episode_i in range(0, 4):
 for m_ in (1,2,3,4,5):
-    for x_ in range(21):
-        for y_ in range(9):
-            for _ in range(4):
+    for x_ in range(1):
+        for y_ in range(1):
+            for _ in range(1):
                 try:
                     heuristic_1 = Heuristic_1()
-                    # # Choosing a map in the list
-                    # # mapID = np.random.randint(1, 6) #Choosing a map ID from 5 maps in Maps folder randomly
-                    # mapID = m[episode_i]
-                    # posID_x = np.random.randint(MAP_MAX_X) #Choosing a initial position of the DQN agent on X-axes randomly
-                    # posID_y = np.random.randint(MAP_MAX_Y) #Choosing a initial position of the DQN agent on Y-axes randomly
-                    # #Creating a request for initializing a map, initial position, the initial energy, and the maximum number of steps of the DQN agent
-                    # request = ("map" + str(mapID) + "," + str(posID_x) + "," + str(posID_y) + ",50,100") 
-                    # x_ = 0
-                    # y_ = 1
+                    x_ = 20
+                    y_ = 0
                     request = 'map{},{},{},50,100'.format(m_, x_, y_)
                     print(request)
-                    # request = 'map1,1,1,50, 100'
                     #Send the request to the game environment (GAME_SOCKET_DUMMY.py)
                     minerEnv.send_map_info(request)
 
@@ -57,16 +49,18 @@ for m_ in (1,2,3,4,5):
                     minerEnv.reset() #Initialize the game environment
                     #Get the state after reseting. 
                     maxStep = minerEnv.state.mapInfo.maxStep #Get the maximum number of steps for each episode in training
-
+                    s = minerEnv.get_state()
+                    # print(s.mapInfo.obstacles)
                     #Start an episde 
+
                     for step in range(0, maxStep):
-                        s = minerEnv.get_state()
+
                         # print(s.x, s.y, s.energy)
-                        tic = time.time()
                         action = heuristic_1.act(s)  
                         # print('step: {}, action: {}'.format(minerEnv.state.stepCount, action))
-                        # print('time: {}'.format(time.time() - tic))
+                        
                         minerEnv.step(str(action))  # Performing the action in order to obtain the new state
+                        s = minerEnv.get_state()
                         if minerEnv.check_terminate():break
 
                     print('bot1_score: {}, step count: {}\n'.format(minerEnv.socket.bots[0].info.score, minerEnv.socket.bots[0].step_count),
