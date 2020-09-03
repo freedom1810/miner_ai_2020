@@ -56,9 +56,10 @@ for m_ in (1,2,3,4,5):
                     for step in range(0, maxStep):
 
                         # print(s.x, s.y, s.energy)
+                        # tic = time.time()
                         action = heuristic_1.act(s)  
                         # print('step: {}, action: {}'.format(minerEnv.state.stepCount, action))
-                        
+                        # print(time.time() - tic)
                         minerEnv.step(str(action))  # Performing the action in order to obtain the new state
                         s = minerEnv.get_state()
                         if minerEnv.check_terminate():break

@@ -1,6 +1,7 @@
 import sys
 import numpy as np
 from dbscan import DbScan
+import time
 
 try:
     from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
@@ -19,7 +20,8 @@ class Heuristic_1:
 
         self.state = None
         self.des = None
-        self.dbscan = 
+        self.list_des = []
+        self.dbscan = None
 
 
     def act(self, state):
@@ -62,6 +64,11 @@ class Heuristic_1:
         return action 
 
     def init_state(self, state):
+        check = False
+        if not self.list_des:
+            # self.list_des = [1]
+            check = True
+
         self.state = state
         self.obstacle_info = self.create_obstacle_info() # khởi tạo mảng 2 chiều về thông tin chướng ngoại vật
         self.gold_info = self.create_gold_info() # khởi tạo mảng 2 chiều về thông tin vàng
@@ -69,8 +76,11 @@ class Heuristic_1:
         self.graph = self.create_graph() # khởi tạo graph tình chi phí đường đi giữa các điểm theo năng lượng
         self.path = self.dijkstra([self.state.x, self.state.y]) # tính đường đi ngắn nhất từ vị trí hiện tại tới tất cả vị trí khác
 
-        self.dbscan = DbScan(self..state, self.obstacle_info, self.gold_info, self.graph).run()
-
+        if check:
+            check = False
+            self.dbscan = DbScan(self.state, self.obstacle_info, self.gold_info, self.graph)
+            self.list_des = self.dbscan.run()
+            check = False
 
     def dao_vang(self):
         if self.state.energy > 5:
@@ -249,13 +259,27 @@ class Heuristic_1:
         if next_cell[1] - self.state.y == 1: return 3
         if next_cell[1] - self.state.y == -1: return 2
 
+    def find_gold_dbscan(self):
+        
+        if self.dbscan is not None:
+            if self.dbscan.order_point_in_cluster:
+                return self.dbscan.order_point_in_cluster.pop()
+            
+        return None
+
     def find_gold(self):
+
+        dbscan_gold = self.find_gold_dbscan()
+        self.list_des = self.dbscan.order_point_in_cluster
+        if dbscan_gold is not None:
+            return dbscan_gold
+
         '''find biggest gold/num_step_to_gold'''
         max_gold = -sys.maxsize
-
+        max_gold_x, max_gold_y = self.state.x, self.state.y
         for cell in self.state.mapInfo.golds:
             gold_potision = [cell['posx'],cell['posy']]
-            num_step_to_gold = self.count_step(gold_potision, path)
+            num_step_to_gold = self.count_step(gold_potision, self.path)
             # print('model: ', num_step_to_gold, cell['amount'])
 
             if max_gold < cell['amount']/num_step_to_gold:

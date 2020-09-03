@@ -19,6 +19,8 @@ class DbScan():
         def dbscan_dis(x, y):             
             return max(1/self.dbscan_distance[int(x[0])][int(x[1])][int(y[0])][int(y[1])] , 
                     1/self.dbscan_distance[int(y[0])][int(y[1])][int(x[0])][int(x[1])] )
+
+            # return np.sum((np.array(x)-np.array(y))**2)
         
         list_gold = []
         for cell in self.state.mapInfo.golds:
@@ -29,6 +31,7 @@ class DbScan():
 
         list_gold_pairwise = pairwise_distances(self.list_gold, metric=dbscan_dis)
         
+
         self.dbscan = DBSCAN(n_jobs = 1, eps=0.04, min_samples=0, metric='precomputed').fit(list_gold_pairwise)
 
         n_cluster = max(self.dbscan.labels_) + 1
@@ -41,7 +44,7 @@ class DbScan():
 
         self.best_cluster, self.order_point_in_cluster = self.find_cluster(clusters)
 
-
+        
 
     def find_cluster(self, clusters):
 
@@ -130,6 +133,8 @@ class DbScan():
                 order_point_in_cluster = copy.deepcopy(order_point_in_cluster_)
         
         return best_cluster, order_point_in_cluster[::-1]
+                
+
 
     def create_gold_distance(self):
 
