@@ -5,7 +5,7 @@ import sys
 from keras.models import model_from_json
 from MinerEnv import MinerEnv
 import numpy as np
-from heuristic_model1 import Heuristic_1
+from heuristic_model_submit_10 import Heuristic_1
 
 ACTION_GO_LEFT = 0
 ACTION_GO_RIGHT = 1

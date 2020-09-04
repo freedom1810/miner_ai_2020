@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from dbscan import DbScan
+from dbscan_submit_10 import DbScan
 import time
 
 try:
@@ -67,6 +67,7 @@ class Heuristic_1:
         check = False
         if not self.list_des:
             # self.list_des = [1]
+            print('compute dbscan')
             check = True
 
         self.state = state
@@ -78,12 +79,9 @@ class Heuristic_1:
 
         if check:
             check = False
-            # tic = time.time()
-            self.dbscan = DbScan(self.state, self.obstacle_info, self.gold_info, self.graph)
+            self.dbscan = DbScan(self.state, self.obstacle_info, self.gold_info, self.graph, self.path)
             self.list_des = self.dbscan.run()
-            # print(time.time() - tic)
             check = False
-
 
     def dao_vang(self):
         if self.state.energy > 5:
@@ -275,8 +273,10 @@ class Heuristic_1:
         dbscan_gold = self.find_gold_dbscan()
         self.list_des = self.dbscan.order_point_in_cluster
         if dbscan_gold is not None:
-            # print(hehe)
+            print('dbscan')
             return dbscan_gold
+
+        print('no dbscan')
 
         '''find biggest gold/num_step_to_gold'''
         max_gold = -sys.maxsize

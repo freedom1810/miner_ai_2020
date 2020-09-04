@@ -1,7 +1,7 @@
 import sys
 # from DQNModel import DQN # A class of creating a deep q-learning model
 from MinerEnv import MinerEnv # A class of creating a communication environment between the DQN model and the GameMiner environment (GAME_SOCKET_DUMMY.py)
-from heuristic_model_submit_9 import Heuristic_1
+from heuristic_model_submit_10 import Heuristic_1
 
 import pandas as pd
 import datetime 
@@ -50,11 +50,9 @@ for m_ in (1,2,3,4,5):
                     #Get the state after reseting. 
                     maxStep = minerEnv.state.mapInfo.maxStep #Get the maximum number of steps for each episode in training
                     s = minerEnv.get_state()
-                    # print(s.mapInfo.obstacles)
                     #Start an episde 
 
                     for step in range(0, maxStep):
-
                         # print(s.x, s.y, s.energy)
                         # tic = time.time()
                         action = heuristic_1.act(s)  
