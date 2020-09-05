@@ -1,6 +1,6 @@
 import sys
 import numpy as np
-from dbscan_submit_10 import DbScan
+from dbscan_submit_11 import DbScan
 import time
 
 try:
@@ -28,6 +28,9 @@ class Heuristic_1:
         self.init_state(state)
 
         if self.state.lastAction == 4 and self.state.energy < 40:
+            return 4
+
+        if len(self.state.mapInfo.golds) == 0:
             return 4
 
         if self.check_des_none() is not None: 
@@ -67,7 +70,7 @@ class Heuristic_1:
         check = False
         if not self.list_des:
             # self.list_des = [1]
-            print('compute dbscan')
+            # print('compute dbscan')
             check = True
 
         self.state = state
@@ -273,7 +276,7 @@ class Heuristic_1:
         dbscan_gold = self.find_gold_dbscan()
         self.list_des = self.dbscan.order_point_in_cluster
         if dbscan_gold is not None:
-            print('dbscan')
+            # print('dbscan')
             return dbscan_gold
 
         print('no dbscan')

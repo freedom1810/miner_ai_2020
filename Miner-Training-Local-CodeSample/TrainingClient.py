@@ -1,7 +1,7 @@
 import sys
 # from DQNModel import DQN # A class of creating a deep q-learning model
 from MinerEnv import MinerEnv # A class of creating a communication environment between the DQN model and the GameMiner environment (GAME_SOCKET_DUMMY.py)
-from heuristic_model_submit_10 import Heuristic_1
+from heuristic_model_submit_12 import Heuristic_1
 
 import pandas as pd
 import datetime 

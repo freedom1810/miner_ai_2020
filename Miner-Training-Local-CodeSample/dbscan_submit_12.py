@@ -25,8 +25,6 @@ class DbScan():
         for cell in self.state.mapInfo.golds:
             list_gold.append([cell['posx'], cell['posy']])
         self.list_gold = np.array(list_gold, dtype=int)
-        # print(self.list_gold)
-        
 
         list_gold_pairwise = pairwise_distances(self.list_gold, metric=dbscan_dis)
         
@@ -38,11 +36,8 @@ class DbScan():
         for i in range(n_cluster):
 
             clusters.append(self.list_gold[self.dbscan.labels_ == i])
-            # print(cluster)
 
         self.best_cluster, self.order_point_in_cluster = self.find_cluster(clusters)
-
-        # print()
 
     def find_cluster(self, clusters):
         
@@ -90,8 +85,8 @@ class DbScan():
                 num_step += num_step_
                 gold += self.gold_info[source[0]][source[1]]
                 
-            if max_gold < gold:
-                max_gold = gold
+            if max_gold < gold/num_step:
+                max_gold = gold/num_step
                 best_cluster = idx_clus
                 order_point_in_cluster = copy.deepcopy(order_point_in_cluster_)
         
@@ -196,7 +191,6 @@ class DbScan():
         # energy = 50
 
         path_to_des = path[gold_potision[0]][gold_potision[1]]
-        # print(path_to_des)
         path_to_des.append(gold_potision)
         path_to_des = path_to_des[1:]
 

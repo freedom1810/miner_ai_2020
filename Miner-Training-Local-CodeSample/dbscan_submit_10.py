@@ -191,7 +191,6 @@ class DbScan():
         # energy = 50
 
         path_to_des = path[gold_potision[0]][gold_potision[1]]
-        # print(path_to_des)
         path_to_des.append(gold_potision)
         path_to_des = path_to_des[1:]
 
