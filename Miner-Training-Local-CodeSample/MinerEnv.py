@@ -1,6 +1,8 @@
 import sys
 import numpy as np
-from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+# from GAME_SOCKET_DUMMY_RANDOM import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+# from GAME_SOCKET_DUMMY import GameSocket
+from GAME_SOCKET_DUMMY_DEBUG import GameSocket
 from MINER_STATE import State
 import copy
 import sys
@@ -30,6 +32,8 @@ class MinerEnv:
         try:
             message = self.socket.receive() #receive game info from server
             self.state.init_state(message) #init state
+
+            # self.check_info_map()
         except Exception as e:
             import traceback
             traceback.print_exc()

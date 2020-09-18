@@ -5,7 +5,8 @@ import sys
 from keras.models import model_from_json
 from MinerEnv import MinerEnv
 import numpy as np
-from heuristic_model_submit_13 import Heuristic_1
+from submit_17_9.heuristic_model import Heuristic_1
+import time
 
 ACTION_GO_LEFT = 0
 ACTION_GO_RIGHT = 1
@@ -34,11 +35,17 @@ try:
     while not minerEnv.check_terminate():
         try:
             # action = np.argmax(DQNAgent.predict(s.reshape(1, len(s))))  # Getting an action from the trained model
+            tic = time.time()
             action = heuristic_1.act(s)
+            print('time {}'.format(time.time() - tic))
             print("next action = ", action)
             minerEnv.step(str(action))  # Performing the action in order to obtain the new state
             s_next = minerEnv.get_state()  # Getting a new state
             s = s_next
+
+            if minerEnv.check_terminate():
+                print('debug: {}'.format(s.status))
+
         except Exception as e:
             import traceback
             traceback.print_exc()
@@ -47,5 +54,5 @@ try:
     print(status_map[minerEnv.state.status])
 except Exception as e:
     import traceback
-    traceback.print_exc()
+    print(e)
 print("End game.")

@@ -1,13 +1,10 @@
 import sys
 import numpy as np
-from dbscan import DbScan
-import time
-
 try:
     from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
 except:
     from GAME_SOCKET import GameSocket 
-
+    
 from MINER_STATE import State
 import copy
 
@@ -20,17 +17,19 @@ class Heuristic_1:
 
         self.state = None
         self.des = None
-        self.list_des = []
-        self.dbscan = None
 
 
     def act(self, state):
+        # return 4
+        # print('step')
         self.init_state(state)
 
         if self.state.lastAction == 4 and self.state.energy < 40:
             return 4
 
+
         if self.check_des_none() is not None: 
+            # print('check des')
             return 4
 
         if self.check_den_dich(): # check xem có đang ở vị trí gold
@@ -64,23 +63,12 @@ class Heuristic_1:
         return action 
 
     def init_state(self, state):
-        check = False
-        if not self.list_des:
-            # self.list_des = [1]
-            check = True
-
         self.state = state
         self.obstacle_info = self.create_obstacle_info() # khởi tạo mảng 2 chiều về thông tin chướng ngoại vật
         self.gold_info = self.create_gold_info() # khởi tạo mảng 2 chiều về thông tin vàng
 
         self.graph = self.create_graph() # khởi tạo graph tình chi phí đường đi giữa các điểm theo năng lượng
         self.path = self.dijkstra([self.state.x, self.state.y]) # tính đường đi ngắn nhất từ vị trí hiện tại tới tất cả vị trí khác
-
-        if check:
-            check = False
-            self.dbscan = DbScan(self.state, self.obstacle_info, self.gold_info, self.graph)
-            self.list_des = self.dbscan.run()
-            check = False
 
     def dao_vang(self):
         if self.state.energy > 5:
@@ -98,8 +86,6 @@ class Heuristic_1:
         # print('self.des: ', self.des)
         if self.des is None:
             return 4 # hết vàng rồi thì k làm gì nữa
-        
-        # self.des = self.find_gold() đẽo cày giữa đường k hiệu quả
 
     def check_di_truoc(self, gold_amount):
         # nếu quyết định đào vàng mà vàng đem về <50 -> đi luôn k đào nữa
@@ -259,29 +245,33 @@ class Heuristic_1:
         if next_cell[1] - self.state.y == 1: return 3
         if next_cell[1] - self.state.y == -1: return 2
 
-    def find_gold_dbscan(self):
-        
-        if self.dbscan is not None:
-            if self.dbscan.order_point_in_cluster:
-                return self.dbscan.order_point_in_cluster.pop()
-            
-        return None
-
     def find_gold(self):
+        ''' find nearest gold'''
+        # min_dis = sys.maxsize
+        # # print(self.state.mapInfo.golds)
+        # for cell in self.state.mapInfo.golds:
+        #     if min_dis > ((self.state.x - cell['posx'])**2 + (self.state.y - cell['posy'])**2) and cell['amount'] > 0:
+        #         min_dis_x = cell['posx']
+        #         min_dis_y = cell['posy']
+        #         min_dis = (self.state.x - cell['posx'])**2 + (self.state.y - cell['posy'])**2
+        # # print(min_dis_x, min_dis_y)
+        # return [min_dis_x, min_dis_y]
 
-        dbscan_gold = self.find_gold_dbscan()
-        self.list_des = self.dbscan.order_point_in_cluster
-        if dbscan_gold is not None:
-            return dbscan_gold
-
+        ''' find biggest gold'''
+        # max_gold = -sys.maxsize
+        # for cell in self.state.mapInfo.golds:
+        #     if max_gold < cell['amount']:
+        #         max_gold_x = cell['posx']
+        #         max_gold_y = cell['posy']
+        #         max_gold = cell['amount']
+        # print(max_gold_x, max_gold_y)
+        # return [max_gold_x, max_gold_y]
+        
         '''find biggest gold/num_step_to_gold'''
         max_gold = -sys.maxsize
-        max_gold_x, max_gold_y = self.state.x, self.state.y
         for cell in self.state.mapInfo.golds:
-            gold_potision = [cell['posx'],cell['posy']]
-            num_step_to_gold = self.count_step(gold_potision, self.path)
+            num_step_to_gold = self.count_step([cell['posx'],cell['posy']])
             # print('model: ', num_step_to_gold, cell['amount'])
-
             if max_gold < cell['amount']/num_step_to_gold:
                 max_gold_x = cell['posx']
                 max_gold_y = cell['posy']
@@ -291,10 +281,10 @@ class Heuristic_1:
 
         return [max_gold_x, max_gold_y]
 
-    def count_step(self, gold_potision, path):
+    def count_step(self, gold_potision):
         energy = self.state.energy
 
-        path_to_des = path[gold_potision[0]][gold_potision[1]]
+        path_to_des = self.path[gold_potision[0]][gold_potision[1]]
         path_to_des.append(gold_potision)
         path_to_des = path_to_des[1:]
 
@@ -328,8 +318,5 @@ class Heuristic_1:
 
         if num_step == 0: return 1
         return num_step
-
-    
-
 
 

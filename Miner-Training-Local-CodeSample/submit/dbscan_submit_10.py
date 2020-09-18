@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.cluster import DBSCAN
 from sklearn.metrics.pairwise import pairwise_distances
 import copy
+import time
 
 class DbScan():
     
@@ -37,7 +38,11 @@ class DbScan():
 
             clusters.append(self.list_gold[self.dbscan.labels_ == i])
 
-        self.best_cluster, self.order_point_in_cluster = self.find_cluster(clusters)
+        for i in range(1000):
+            tic = time.time()
+            self.best_cluster, self.order_point_in_cluster = self.find_cluster(clusters)
+            print('dbscan: {}'.format(time.time() - tic))
+            print('dbscan: {}'.format(self.best_cluster))
 
     def find_cluster(self, clusters):
         
@@ -190,7 +195,8 @@ class DbScan():
     def count_step(self, gold_potision, path, energy = 50):
         # energy = 50
 
-        path_to_des = path[gold_potision[0]][gold_potision[1]]
+        path_to_des = copy.deepcopy(path[gold_potision[0]][gold_potision[1]])
+        # print(path[gold_potision[0]][gold_potision[1]])
         path_to_des.append(gold_potision)
         path_to_des = path_to_des[1:]
 

@@ -1,0 +1,39 @@
+map1,20,0,50,100
+Reset game:  ['map1', '20', '0', '50', '100']
+numberOfPlayers:  4
+bot1_score: 2275, step count: 100
+ bot2_score: 1775, step count: 100
+ bot3_score: 0, step count: 100
+ user_score: 1450, step count: 100
+
+map2,20,0,50,100
+Reset game:  ['map2', '20', '0', '50', '100']
+numberOfPlayers:  4
+bot1_score: 1975, step count: 100
+ bot2_score: 1600, step count: 100
+ bot3_score: 0, step count: 100
+ user_score: 2225, step count: 100
+
+map3,20,0,50,100
+Reset game:  ['map3', '20', '0', '50', '100']
+numberOfPlayers:  4
+bot1_score: 1792, step count: 100
+ bot2_score: 1617, step count: 100
+ bot3_score: 0, step count: 100
+ user_score: 2292, step count: 100
+
+map4,20,0,50,100
+Reset game:  ['map4', '20', '0', '50', '100']
+numberOfPlayers:  4
+bot1_score: 2425, step count: 100
+ bot2_score: 1000, step count: 100
+ bot3_score: 0, step count: 100
+ user_score: 2575, step count: 100
+
+map5,20,0,50,100
+Reset game:  ['map5', '20', '0', '50', '100']
+numberOfPlayers:  4
+bot1_score: 1867, step count: 100
+ bot2_score: 1592, step count: 100
+ bot3_score: 0, step count: 100
+ user_score: 2492, step count: 100

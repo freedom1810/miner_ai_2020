@@ -155,9 +155,11 @@ class GameSocket:
     def reset_map(self, id):  # load map info
         self.mapId = id
         self.map = json.loads(self.maps[self.mapId])
+        # print(self.maps[self.mapId])
+        # self.map = json.loads('Maps/auto-1609')
         self.userMatch = self.map_info(self.map)
         self.stepState.golds = self.userMatch.gameinfo.golds
-        self.map = json.loads(self.maps[self.mapId])
+        # self.map = json.loads(self.maps[self.mapId])
         self.energyOnMap = json.loads(self.maps[self.mapId])
         for x in range(len(self.map)):
             for y in range(len(self.map[x])):

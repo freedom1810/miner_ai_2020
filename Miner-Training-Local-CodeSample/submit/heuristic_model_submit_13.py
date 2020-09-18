@@ -1,6 +1,10 @@
 import sys
 import numpy as np
-from GAME_SOCKET import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+try:
+    from GAME_SOCKET_DUMMY import GameSocket #in testing version, please use GameSocket instead of GAME_SOCKET_DUMMY
+except:
+    from GAME_SOCKET import GameSocket 
+
 from MINER_STATE import State
 import copy
 
