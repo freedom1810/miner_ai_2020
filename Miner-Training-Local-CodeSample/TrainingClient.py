@@ -64,7 +64,7 @@ for m_ in range(6)[1:]:
                         # print(heuristic_1.des)
                         # print(action)
 
-                        print('step: {}, action: {}'.format(minerEnv.state.stepCount, action))
+                        # print('step: {}, action: {}'.format(minerEnv.state.stepCount, action))
                         # print(time.time() - tic)
 
                         minerEnv.step(str(action))  # Performing the action in order to obtain the new state

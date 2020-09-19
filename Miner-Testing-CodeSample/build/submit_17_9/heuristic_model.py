@@ -64,7 +64,9 @@ class Heuristic_1:
 
     def act(self, state):
         # self.state = self.init_state(state)
-
+        # print(state.mapInfo.golds)
+        # print('state.mapInfo.golds')
+        # print(state.mapInfo.golds)
         state.mapInfo.golds = self.delete_gold(state)
 
         self.state = self.dijkstra.init_state(state)
@@ -103,6 +105,8 @@ class Heuristic_1:
                 gold_temp.append(cell)
 
         if len(gold_temp) <3:
+            # print('gold_temp')
+            # print(gold_temp)
             return state.mapInfo.golds
         return gold_temp
 
@@ -140,6 +144,7 @@ class Heuristic_1:
             return True # hết vàng rồi thì k làm gì nữa
 
     def find_des(self):
+        # print('find_des before {} '.format(self.state.mapInfo.golds))
 
         if len(self.state.mapInfo.golds) > 3:
             for player in self.state.players :
@@ -161,12 +166,13 @@ class Heuristic_1:
                         self.state.mapInfo.golds = golds_temp
 
                     self.state.gold_info[des_temp[0]][des_temp[1]] = 0
-        
+        # print('find_des after {} '.format(self.state.mapInfo.golds))
         if not self.dijkstra.list_gold:
             self.dijkstra.find_n_gold_filter(self.state)  
 
         if not self.dijkstra.list_gold:
             return 
+
         cell = self.dijkstra.list_gold.pop()
         self.des = [cell['posx'], cell['posy']]
 

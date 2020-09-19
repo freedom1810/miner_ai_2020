@@ -26,11 +26,9 @@ class Dijkstra:
     def init_state(self, state):
         state.obstacle_info = self.create_obstacle_info(state) # khởi tạo mảng 2 chiều về thông tin chướng ngoại vật
         state.gold_info, state.mapInfo.golds = self.create_gold_info(state) # khởi tạo mảng 2 chiều về thông tin vàng
-
         state.graph = self.create_graph(state.obstacle_info) # khởi tạo graph tình chi phí đường đi giữa các điểm theo năng lượng
-        # tic = time.time()
         state.path = self.dijkstra([state.x, state.y], state.graph, state.mapInfo.golds) # tính đường đi ngắn nhất từ vị trí hiện tại tới tất cả vị trí khác
-        # print('dijkstra time: {}'.format(time.time() - tic))
+
 
         return state
 
@@ -53,11 +51,6 @@ class Dijkstra:
         view = np.zeros([state.mapInfo.max_x + 1, state.mapInfo.max_y + 1], dtype=int)
         gold_temp = []
         for i, cell in enumerate(state.mapInfo.golds):
-            # if cell['amount'] > 200:
-            #     gold_temp.append(cell)
-            #     view[cell["posx"]][cell["posy"]] = cell['amount']
-
-            # elif cell['posx'] == state.x and cell['posy'] == state.y:
             gold_temp.append(cell)
             view[cell["posx"]][cell["posy"]] = cell['amount']
 
@@ -115,8 +108,7 @@ class Dijkstra:
             if cell['posx'] >= window_size[0][0] \
                 and cell['posx'] <= window_size[1][0] \
                 and cell['posy'] >= window_size[0][1] \
-                and cell['posy'] <= window_size[1][1] \
-                and cell['amount'] >= 200:
+                and cell['posy'] <= window_size[1][1] :
                 return True
 
             return False
@@ -130,21 +122,34 @@ class Dijkstra:
         stride = 2
         for i in range(int((width - kernel_size[0]) / stride) + 1):
             for j in range(int((height - kernel_size[1])/stride) + 1):
+
+                window_size = [(i*stride, j*stride), (kernel_size[0] + i*stride - 1, kernel_size[1] + j*stride - 1)]
+
+                number_player = 0
                 gold_list = []
                 gold = 0
 
-                window_size = [(i*stride, j*stride), (kernel_size[0] + i*stride - 1, kernel_size[1] + j*stride - 1)]
+                for player in state.players:
+                    if check_in_window(window_size, player):
+                        number_player += 1
+
+                
                 
                 for cell in state.mapInfo.golds:
                     if check_in_window(window_size, cell):
                         gold_list.append(cell)
                         gold += cell['amount']
 
-                if gold > max_gold:
-                    max_gold = gold 
-                    max_gold_list = gold_list
+            # print(gold)
+            # number_player = max(1, number_player)
+            if gold > max_gold:
+                max_gold = gold 
+                max_gold_list = gold_list
 
+        # print('find_n_gold_filter before {}'.format(state.mapInfo.golds))  
         state.mapInfo.golds = max_gold_list
+
+        # print('find_n_gold_filter {}'.format(state.mapInfo.golds))  
         
 
         self.find_n_gold(state)
@@ -155,7 +160,7 @@ class Dijkstra:
         # print(permutations_position)
 
         if len(permutations_position) == 0:
-            permutations_position = list(permutations(state.mapInfo.golds, 1))
+            permutations_position = list(permutations(state.mapInfo.golds, len(state.mapInfo.golds)))
         
         max_gold = -sys.maxsize
         optimize_idx = -1
@@ -167,19 +172,19 @@ class Dijkstra:
             num_step = 0
             for cell in p:
 
-                num_step_to_gold, energy_temp = self.count_step(state_temp, cell['posx'] + cell['posy']*21, mode = mode)
+                num_step_to_gold, energy_temp, gold_take = self.count_step(state_temp, cell['posx'] + cell['posy']*21, mode = mode)
 
                 state_temp.energy = energy_temp
                 state_temp.x = cell['posx']
                 state_temp.y = cell['posy']
 
-                gold += cell['amount']
+                gold += gold_take
                 num_step += num_step_to_gold
 
-
-            if max_gold < gold/num_step and state.stepCount + num_step <= 100: 
-                optimize_idx = i
-                max_gold = gold/num_step
+            if gold > 0:
+                if max_gold < gold/num_step and state.stepCount + num_step <= 100: 
+                    optimize_idx = i
+                    max_gold = gold/num_step
 
         # print(optimize_idx)
         # print(len(permutations_position))
@@ -209,12 +214,12 @@ class Dijkstra:
         energy = state.energy
         
         for i, cell in enumerate(state.mapInfo.golds):
-            num_step_to_gold, energy_temp = self.count_step(state, cell['posx'] + cell['posy']*21)
+            num_step_to_gold, energy_temp, gold_take = self.count_step(state, cell['posx'] + cell['posy']*21)
 
-            if max_gold < cell['amount']/num_step_to_gold:
+            if max_gold < gold_take/num_step_to_gold:
                 optimize_idx = i
                 energy = energy_temp
-                max_gold = cell['amount']/num_step_to_gold
+                max_gold = gold_take/num_step_to_gold
                 num_step = num_step_to_gold
         # print('model: x: {}, y: {}, num_step: {}'.format(max_gold_x, max_gold_y, n))        
 
@@ -261,10 +266,15 @@ class Dijkstra:
         energy += self.lost_energy_next_step(next_position, state)
         num_step += 1
 
+        gold_take = 0
         if mode == 2:
             gold_amount = state.gold_info[gold_position_f%21, gold_position_f//21]
 
             while gold_amount > 0:
+
+                if state.stepCount + num_step > 100:
+                    break
+
                 if 5 >= energy:
                     for nang_luong_hoi in (4,3,2):
                         if energy < 40:
@@ -274,8 +284,9 @@ class Dijkstra:
                 energy += -5
                 num_step += 1
                 gold_amount -= 50
+                gold_take += 50
 
-        if num_step == 0: return 1, energy
-        return num_step, energy
+        if num_step == 0: return 1, energy, gold_take
+        return num_step, energy, gold_take
 
 
